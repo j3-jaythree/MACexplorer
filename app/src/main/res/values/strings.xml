@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="start">START SCANNING</string>
+    <string name="stop">STOP SCANNING</string>
+    <string name="channel_name">MACexplorer channel</string>
+    <string name="channel_description">Channel for the mac explorer notifications</string>
+    <string name="title_activity_data_base_viewer">ScrollingActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_wifi_scan_explorer">WifiScanExplorerActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+</resources>

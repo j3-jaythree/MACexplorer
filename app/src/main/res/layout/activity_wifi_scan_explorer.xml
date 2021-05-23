@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/wifiscanexplorer"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context=".dbviewer.WifiScanExplorerActivity">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:layout_height="0dp">
+
+        <EditText
+            android:id="@+id/textView1"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Street"
+            android:layout_gravity="left"
+            android:background="#88FF0000"/>
+
+        <EditText
+            android:id="@+id/textView1"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Street"
+            android:layout_gravity="left"
+            android:background="#88FF0000"/>
+
+        <EditText
+            android:id="@+id/textView1"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Street"
+            android:layout_gravity="left"
+            android:background="#88FF0000"/>
+
+    </LinearLayout>
+    <EditText
+        android:id="@+id/textView1"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Street"
+        android:layout_gravity="left"
+        android:background="#88FF0000"/>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="456546546"
+        android:layout_gravity="right"
+        android:background="#8800FF00"/>
+
+    <EditText
+        android:id="@+id/editTextTextPersonName2"
+        too:layout_conversion_absoluteWidth="137dp"
+        toolsls:layout_editor_absoluteY="0dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginLeft="100dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_conversion_absoluditor_absoluteX="137dp"
+        tools:layout_eteHeight="19dp" />
+
+    <EditText
+        android:id="@+id/editTextTextPersonName3"
+        too:layout_conversion_absoluteWidth="137dp"
+        toolsls:layout_editor_absoluteY="0dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="200dp"
+        android:layout_marginLeft="200dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_conversion_absoluditor_absoluteX="274dp"
+        tools:layout_eteHeight="19dp" />
+
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        tools:layouconversion_absoluteWidth="137dp"
+        tools:layout_conversion_absoluteHeightabsoluteX="0dp"
+        tools:layout_editor_="48dp"
+        tools:layout_t_editor_absoluteY="0dp" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        tools:layouconversion_absoluteWidth="137dp"
+        tools:layout_conversion_absoluteHeightsoluteX="137dp"
+        tools:layout_editor_ab="48dp"
+        tools:layout_t_editor_absoluteY="0dp" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        tools:layouconversion_absoluteWidth="137dp"
+        tools:layout_conversion_absoluteHeightsoluteX="274dp"
+        tools:layout_editor_ab="48dp"
+        tools:layout_t_editor_absoluteY="0dp" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/wifi_recyclerview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</LinearLayout>
