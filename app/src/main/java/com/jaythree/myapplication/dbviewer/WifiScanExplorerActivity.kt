@@ -76,7 +76,7 @@ class WifiScanExplorerActivity : AppCompatActivity() {
                 }
                 //At least ID
                 else if(idtxt?.text.toString() != "ID"){
-                    query = "SELECT * from wifiscan WHERE id=${idtxt?.text} "
+                    query = "SELECT * FROM wifiscan WHERE bssid=\"${idtxt?.text}\""
                     if(lattxt?.text.toString() != "Latitud")
                         query += "AND lat=${lattxt?.text} "
                     if(lontxt?.text.toString() != "Longitud")
@@ -86,14 +86,14 @@ class WifiScanExplorerActivity : AppCompatActivity() {
                 }
                 //At least lat
                 else if(lattxt?.text.toString() != "Latitud"){
-                    query = "SELECT * from wifiscan WHERE lat=${lattxt?.text} "
+                    query = "SELECT * FROM wifiscan WHERE lat=${lattxt?.text} "
                     if(lontxt?.text.toString() != "Longitud")
                         query += "AND lon=${lontxt?.text}"
                     wifilist = DataBase.getDatabase(applicationContext).
                     wifiscanDAO().executeQuery(SimpleSQLiteQuery(query))
                 }
                 else {
-                    query = "SELECT * from wifiscan WHERE lon=${lontxt?.text}"
+                    query = "SELECT * FROM wifiscan WHERE lon=${lontxt?.text}"
                     wifilist = DataBase.getDatabase(applicationContext).
                     wifiscanDAO().executeQuery(SimpleSQLiteQuery(query))
                 }
@@ -103,7 +103,40 @@ class WifiScanExplorerActivity : AppCompatActivity() {
                     recyclerView?.adapter = wifiadapter
                 }
             } else {
+                var bluetoothlist = DataBase.getDatabase(applicationContext).bluetoothscanDAO().selectAll()
+                //Default
+                if(idtxt?.text.toString() == "ID" && lattxt?.text.toString() == "Latitud"
+                        && lontxt?.text.toString() == "Longitud"){
+                    bluetoothlist = DataBase.getDatabase(applicationContext).bluetoothscanDAO().selectAll()
+                }
+                //At least ID
+                else if(idtxt?.text.toString() != "ID"){
+                    query = "SELECT * FROM bluetoothscan WHERE mac=\"${idtxt?.text}\""
+                    if(lattxt?.text.toString() != "Latitud")
+                        query += "AND lat=${lattxt?.text} "
+                    if(lontxt?.text.toString() != "Longitud")
+                        query += "AND lon=${lontxt?.text}"
+                    bluetoothlist = DataBase.getDatabase(applicationContext).
+                    bluetoothscanDAO().executeQuery(SimpleSQLiteQuery(query))
+                }
+                //At least lat
+                else if(lattxt?.text.toString() != "Latitud"){
+                    query = "SELECT * FROM bluetoothscan WHERE lat=${lattxt?.text} "
+                    if(lontxt?.text.toString() != "Longitud")
+                        query += "AND lon=${lontxt?.text}"
+                    bluetoothlist = DataBase.getDatabase(applicationContext).
+                    bluetoothscanDAO().executeQuery(SimpleSQLiteQuery(query))
+                }
+                else {
+                    query = "SELECT * FROM bluetoothscan WHERE lon=${lontxt?.text}"
+                    bluetoothlist = DataBase.getDatabase(applicationContext).
+                    bluetoothscanDAO().executeQuery(SimpleSQLiteQuery(query))
+                }
 
+                var bluetoothadapter = BluetoothScanAdapter(applicationContext, bluetoothlist)
+                runOnUiThread {
+                    recyclerView?.adapter = bluetoothadapter
+                }
             }
 
         }

@@ -1,6 +1,7 @@
 package com.jaythree.myapplication.db
 
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 
 @Dao
 interface BluetoothScanDAO {
@@ -9,7 +10,7 @@ interface BluetoothScanDAO {
     suspend fun insert(bluetootscan: BluetoothScan): Long
 
     @Query("SELECT * FROM bluetoothscan")
-    suspend fun select_all(): List<BluetoothScan>
+    suspend fun selectAll(): List<BluetoothScan>
 
     @Query("UPDATE bluetoothscan " +
             "SET end = :time " +
@@ -23,6 +24,9 @@ interface BluetoothScanDAO {
             "AND lat = :lat " +
             "AND lon = :lon ")
     suspend fun exists(mac: String, lat: Double, lon: Double): List<BluetoothScan>
+
+    @RawQuery
+    suspend fun executeQuery(query: SupportSQLiteQuery): List<BluetoothScan>
 
 
 }
