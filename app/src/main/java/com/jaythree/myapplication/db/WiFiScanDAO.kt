@@ -1,8 +1,8 @@
 package com.jaythree.myapplication.db
 
 
-import android.provider.MediaStore
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 
 @Dao
 interface WiFiScanDAO {
@@ -25,5 +25,8 @@ interface WiFiScanDAO {
             "AND lat = :lat " +
             "AND lon = :lon ")
     suspend fun exists(bssid: String, lat: Double, lon: Double): List<WiFiScan>
+
+    @RawQuery
+    suspend fun executeQuery(query: SupportSQLiteQuery): List<WiFiScan>
 
 }
