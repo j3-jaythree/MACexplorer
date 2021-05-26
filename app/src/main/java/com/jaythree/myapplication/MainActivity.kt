@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100) {
-            when (grantResults[0]) {
+            when (grantResults[grantResults.size]) {
                 PackageManager.PERMISSION_GRANTED -> startService()
                 PackageManager.PERMISSION_DENIED -> {Toast.makeText(this, "We need " +
                         "location permission to work", Toast.LENGTH_SHORT).show()
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         if (requestCode == 105) {
-            when (grantResults[0]) {
+            when (grantResults[grantResults.size]) {
                 PackageManager.PERMISSION_GRANTED -> startService()
                 PackageManager.PERMISSION_DENIED -> {Toast.makeText(this, "We need " +
                         "location permission to work", Toast.LENGTH_SHORT).show()
