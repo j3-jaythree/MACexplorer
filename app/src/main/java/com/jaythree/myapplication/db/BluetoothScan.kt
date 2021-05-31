@@ -4,7 +4,7 @@ import androidx.room.*
 
 @Entity(
     tableName = "bluetoothscan",
-    indices = [Index(value = ["mac"], unique = true)])
+    indices = [Index(value = ["mac"], unique = false)])
 data class BluetoothScan(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") var id: Long=0,
@@ -12,12 +12,11 @@ data class BluetoothScan(
     @ColumnInfo(name = "lat") var lat: Double,
     @ColumnInfo(name = "lon") var lon: Double,
     @ColumnInfo(name = "intensity") var intensity: Int,
-    @ColumnInfo(name = "day") var day: Int,
-    @ColumnInfo(name = "month") var month: Int,
-    @ColumnInfo(name = "year") var year: Int,
-    @ColumnInfo(name = "begin") var begin: Int,
-    @ColumnInfo(name = "end") var end: Int){
+    @ColumnInfo(name = "begin") var begin: Long,
+    @ColumnInfo(name = "end") var end: Long,
+    @ColumnInfo(name = "flag") var flag: Int){
 
-    constructor() : this(0L,"",0.0, 0.0,0,0,0,0,0,0)
+    constructor(mac: String, lat: Double, lon: Double, intensity: Int, begin: Long, end: Long) :
+            this(0L,"",0.0, 0.0,0,0L,0L,0)
 
 }

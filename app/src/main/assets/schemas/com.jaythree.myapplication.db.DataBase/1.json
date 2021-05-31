@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "508ce2b3ab3d626f2834ed4ea5ed250c",
+    "identityHash": "78fc6b6c0eec6c08fd4d9d95b5aa39f0",
     "entities": [
       {
         "tableName": "wifiscan",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bssid` TEXT NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, `intensity` INTEGER NOT NULL, `day` INTEGER NOT NULL, `month` INTEGER NOT NULL, `year` INTEGER NOT NULL, `begin` INTEGER NOT NULL, `end` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bssid` TEXT NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, `intensity` INTEGER NOT NULL, `begin` INTEGER NOT NULL, `end` INTEGER NOT NULL, `flag` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -39,24 +39,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "day",
-            "columnName": "day",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "month",
-            "columnName": "month",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "year",
-            "columnName": "year",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "begin",
             "columnName": "begin",
             "affinity": "INTEGER",
@@ -65,6 +47,12 @@
           {
             "fieldPath": "end",
             "columnName": "end",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flag",
+            "columnName": "flag",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -89,7 +77,7 @@
       },
       {
         "tableName": "bluetoothscan",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mac` TEXT NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, `intensity` INTEGER NOT NULL, `day` INTEGER NOT NULL, `month` INTEGER NOT NULL, `year` INTEGER NOT NULL, `begin` INTEGER NOT NULL, `end` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `mac` TEXT NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, `intensity` INTEGER NOT NULL, `begin` INTEGER NOT NULL, `end` INTEGER NOT NULL, `flag` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -122,24 +110,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "day",
-            "columnName": "day",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "month",
-            "columnName": "month",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "year",
-            "columnName": "year",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "begin",
             "columnName": "begin",
             "affinity": "INTEGER",
@@ -148,6 +118,12 @@
           {
             "fieldPath": "end",
             "columnName": "end",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flag",
+            "columnName": "flag",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -161,11 +137,11 @@
         "indices": [
           {
             "name": "index_bluetoothscan_mac",
-            "unique": true,
+            "unique": false,
             "columnNames": [
               "mac"
             ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_bluetoothscan_mac` ON `${TABLE_NAME}` (`mac`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_bluetoothscan_mac` ON `${TABLE_NAME}` (`mac`)"
           }
         ],
         "foreignKeys": []
@@ -174,7 +150,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '508ce2b3ab3d626f2834ed4ea5ed250c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '78fc6b6c0eec6c08fd4d9d95b5aa39f0')"
     ]
   }
 }

@@ -37,7 +37,7 @@ import java.util.*
 class MacExplorerService : Service() {
 
     //a lock so we can avoid getting affected by Doze Mode
-    private var wakeLock: PowerManager.WakeLock? = null
+    private var powerLock: PowerManager.WakeLock? = null
 
     private var wifiManager :WifiManager? = null
     private var locationManager : LocationManager? = null
@@ -55,7 +55,8 @@ class MacExplorerService : Service() {
     private class LocationListener(provider: String) : android.location.LocationListener {
         var lastLocation: Location
         override fun onLocationChanged(location: Location) {
-            Log.d(TAG, "onLocationChanged: ${location.latitude} ${location.longitude}")
+            Log.d(TAG, "onLocationChanged: ${location.latitude} ${location.longitude} " +
+                    "${location.time}")
             lastLocation.set(location)
         }
 
@@ -92,9 +93,9 @@ class MacExplorerService : Service() {
         Log.d(TAG, "Starting the service as foreground")
         Toast.makeText(this, "Scanning started", Toast.LENGTH_SHORT).show()
         //From the docs how to acquire a lock to keep the device awake and prevent doze mode
-        wakeLock =
+        powerLock =
                 (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::MyWakelockTag").apply {
+                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MACExplorer::powerlock").apply {
                         acquire()
                     }
                 }
@@ -107,9 +108,9 @@ class MacExplorerService : Service() {
         Log.d(TAG, "Location Manager started")
         btAdapter = BluetoothAdapter.getDefaultAdapter()
         try {
-                    locationManager!!.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER, 1000 * 30, 20F,
-                            locationListener)
+            locationManager!!.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 1000 * 1, 0F,
+                    locationListener)
         } catch (ex: SecurityException) {
             Log.i(TAG, "fail to request location update, ignore", ex)
         } catch (ex: IllegalArgumentException) {
@@ -125,14 +126,15 @@ class MacExplorerService : Service() {
 
                 GlobalScope.launch(Dispatchers.IO) {
                     //Looper.prepare()
-                    var day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-                    var month = Calendar.getInstance().get(Calendar.MONTH)
-                    var year = Calendar.getInstance().get(Calendar.YEAR)
-                    var hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-                    var minute = Calendar.getInstance().get(Calendar.MINUTE)
-                    var time = hour*60 + minute
-                    var lat = 0.0
-                    var lon = 0.0
+
+                    //var day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+                    //var month = Calendar.getInstance().get(Calendar.MONTH)
+                    //var year = Calendar.getInstance().get(Calendar.YEAR)
+                    //var hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                    //var minute = Calendar.getInstance().get(Calendar.MINUTE)
+                    var time = 0L
+                    var lat: Double
+                    var lon: Double
                     val wifiScanDAO = DataBase.getDatabase(applicationContext).wifiscanDAO()
                     val bluetoothScanDAO = DataBase.getDatabase(applicationContext).bluetoothscanDAO()
                     Log.d(TAG, "Scanning now")
@@ -151,6 +153,7 @@ class MacExplorerService : Service() {
                     } else {
                         lon = locationListener.lastLocation.longitude
                         lat = locationListener.lastLocation.latitude
+                        time = locationListener.lastLocation.time
                         Log.d(TAG, "Getting last location $lon $lat")
                         if(lon == 0.0 && lat == 0.0) {
                             lon = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.longitude
@@ -162,20 +165,36 @@ class MacExplorerService : Service() {
                     wifiManager?.let {
                         var scanList = it.scanResults as ArrayList<ScanResult>
                         for (scan in scanList) {
-                            var res = wifiScanDAO.exists(scan.BSSID, lat, lon)
-                            if(res.isNotEmpty()){
-                                wifiScanDAO.updateTime(time, scan.BSSID, lat, lon)
-                                Log.d(TAG, "Updated: ${scan.BSSID} into ${res[0].id}")
+                            if(scan.level <= -67){
+                                var actives = wifiScanDAO.active(scan.BSSID)
+                                if(actives.isNotEmpty()){
+                                    wifiScanDAO.updateTime(time, scan.BSSID)
+                                    Log.d(TAG, "Updated: ${scan.BSSID} into ${actives[0].id}")
+                                } else {
+                                    var wifiScan = WiFiScan(bssid = scan.BSSID, lat = lat, lon = lon,
+                                    intensity = scan.level, begin = time, end = time)
+                                    Log.d(TAG, wifiScan.toString())
+                                    var r = wifiScanDAO.insert(wifiScan)
+                                    Log.d(TAG, "Scan: ${scan.BSSID} into $r")
+                                }
+                                /*
+                                var res = wifiScanDAO.exists(scan.BSSID, lat, lon)
+                                if(res.isNotEmpty()){
+                                    wifiScanDAO.updateTime(time, scan.BSSID, lat, lon)
+                                    Log.d(TAG, "Updated: ${scan.BSSID} into ${res[0].id}")
+                                } else {
+                                    var wiFiScan = WiFiScan(bssid = scan.BSSID, lat = lat, lon = lon,
+                                            intensity = scan.level, begin = time, end = time)
+                                    var r = wifiScanDAO.insert(wiFiScan)
+                                    Log.d(TAG, "Scan: ${scan.BSSID} into $r")
+                                }*/
                             } else {
-                                var wiFiScan = WiFiScan(bssid = scan.BSSID, lat = lat, lon = lon,
-                                        intensity = scan.level, day = day, month = month, year = year,
-                                        begin = time, end = time)
-                                var r = wifiScanDAO.insert(wiFiScan)
-                                Log.d(TAG, "Scan: ${scan.BSSID} into $r")
+                                if(wifiScanDAO.active(scan.BSSID).isNotEmpty()){
+                                    wifiScanDAO.setInactive(scan.BSSID)
+                                }
                             }
-
                         }
-                        Log.d(TAG, "Scan:" + lat.toString() + lon.toString())
+
                     }
                     btReceiver = object : BroadcastReceiver() {
                         override fun onReceive(context: Context, intent: Intent) {
@@ -191,19 +210,33 @@ class MacExplorerService : Service() {
                                 val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE).toInt()
                                 Log.d(TAG, rssi.toString())
                                 GlobalScope.launch(Dispatchers.IO) {
-                                    var res = bluetoothScanDAO.exists(device!!.address, lat, lon)
+                                    if(rssi <= -82) {
+                                        var actives = bluetoothScanDAO.active(device!!.address)
+                                        if (actives.isNotEmpty()){
+                                            bluetoothScanDAO.updateTime(time, device.address)
+                                            Log.d(TAG, "Updatedbt: ${device.address} into ${actives[0].id}")
+                                        } else {
+                                            var btScan = BluetoothScan(mac = device.address, lat = lat, lon = lon,
+                                                    intensity = rssi, begin = time, end = time)
+                                            var r = bluetoothScanDAO.insert(btScan)
+                                            Log.d(TAG, "BTScan: ${device.address} into $r")
+                                        }
+                                    } else {
+                                        if(bluetoothScanDAO.active(device!!.address).isNotEmpty()){
+                                            bluetoothScanDAO.setInactive(device.address)
+                                        }
+                                    }
+                                    /*var actives = bluetoothScanDAO.exists(device!!.address, lat, lon)
                                     if (res.isNotEmpty()) {
                                         bluetoothScanDAO.updateTime(time, device.address, lat, lon)
                                         Log.d(TAG, "Updatedbt: ${device.address} into ${res[0].id}")
                                     } else {
                                         var btScan = BluetoothScan(mac = device.address, lat = lat, lon = lon,
-                                                intensity = rssi, day = day, month = month, year = year,
-                                                begin = time, end = time)
+                                                intensity = rssi, begin = time, end = time)
                                         var r = bluetoothScanDAO.insert(btScan)
                                         Log.d(TAG, "BTScan: ${device.address} into $r")
-                                    }
+                                    }*/
                                 }
-
                             }
                         }
                     }
@@ -220,7 +253,7 @@ class MacExplorerService : Service() {
 
 
                 }
-                delay(1000 * 60 * 1)
+                delay(1000 * 15)
             }
         }
         return START_STICKY
@@ -234,7 +267,7 @@ class MacExplorerService : Service() {
         unregisterReceiver(btReceiver);
         stopForeground(true)
         Log.d(TAG, "Service stopped")
-        wakeLock?.let { if (it.isHeld) { it.release() } }
+        powerLock?.let { if (it.isHeld) { it.release() } }
         Toast.makeText(this, "Scanning stopped", Toast.LENGTH_SHORT).show()
     }
 
