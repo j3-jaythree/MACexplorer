@@ -17,6 +17,6 @@ data class BluetoothScan(
     @ColumnInfo(name = "flag") var flag: Int){
 
     constructor(mac: String, lat: Double, lon: Double, intensity: Int, begin: Long, end: Long) :
-            this(0L,"",0.0, 0.0,0,0L,0L,0)
+            this(0L,mac,lat, lon,intensity,begin,end,1)
 
 }

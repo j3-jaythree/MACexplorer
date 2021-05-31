@@ -16,14 +16,13 @@ import android.location.Location
 import android.location.LocationManager
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import android.os.Build
-import android.os.IBinder
-import android.os.Parcelable
-import android.os.PowerManager
+import android.os.*
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.OnCompleteListener
 import com.jaythree.myapplication.db.BluetoothScan
 import com.jaythree.myapplication.db.DataBase
 import com.jaythree.myapplication.db.WiFiScan
@@ -50,7 +49,7 @@ class MacExplorerService : Service() {
 
 
     //Stuff for location changing over time
-
+    private lateinit var serviceHandler : Handler
 
     private class LocationListener(provider: String) : android.location.LocationListener {
         var lastLocation: Location
@@ -109,13 +108,36 @@ class MacExplorerService : Service() {
         btAdapter = BluetoothAdapter.getDefaultAdapter()
         try {
             locationManager!!.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, 1000 * 1, 0F,
+                    LocationManager.GPS_PROVIDER, 1000 * 1L, 0F,
                     locationListener)
         } catch (ex: SecurityException) {
             Log.i(TAG, "fail to request location update, ignore", ex)
-        } catch (ex: IllegalArgumentException) {
+        } /*catch (ex: IllegalArgumentException) {
             Log.d(TAG, "network provider does not exist, " + ex.message)
+        }*/
+
+        //*****************************************************************************
+        /*val locationRequest = createLocationRequest()
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                location = locationResult.lastLocation
+            }
         }
+        //val builder = LocationSettingsRequest.Builder()
+          //      .addLocationRequest(locationRequest)
+        val fusedLocationClient = FusedLocationProviderClient(applicationContext)
+        try {
+            fusedLocationClient.requestLocationUpdates(locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper())
+        } catch (e: SecurityException){
+            Log.d(TAG, "Error with location permission")
+        }*/
+
+
+
+        //*****************************************************************************
 
 
         //START OF OUR SCANS LOOP
@@ -125,6 +147,7 @@ class MacExplorerService : Service() {
                 Log.d(TAG, isRunning().toString())
 
                 GlobalScope.launch(Dispatchers.IO) {
+                    //locationManager.getCurrentLocation(LocationManager.GPS_PROVIDER, null, )
                     //Looper.prepare()
 
                     //var day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
@@ -149,7 +172,8 @@ class MacExplorerService : Service() {
                         //lat = locationListener.lastLocation.latitude
                         lon = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.longitude
                         lat = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.latitude
-                        Log.d(TAG, "Getting last location known $lon $lat")
+                        time = System.currentTimeMillis()
+                            Log.d(TAG, "Getting last location known $lon $lat")
                     } else {
                         lon = locationListener.lastLocation.longitude
                         lat = locationListener.lastLocation.latitude
@@ -158,6 +182,7 @@ class MacExplorerService : Service() {
                         if(lon == 0.0 && lat == 0.0) {
                             lon = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.longitude
                             lat = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.latitude
+                            time = System.currentTimeMillis()
                             Log.d(TAG, "Getting last location known $lon $lat")
                         }
                     }
@@ -172,7 +197,7 @@ class MacExplorerService : Service() {
                                     Log.d(TAG, "Updated: ${scan.BSSID} into ${actives[0].id}")
                                 } else {
                                     var wifiScan = WiFiScan(bssid = scan.BSSID, lat = lat, lon = lon,
-                                    intensity = scan.level, begin = time, end = time)
+                                            intensity = scan.level, begin = time, end = time)
                                     Log.d(TAG, wifiScan.toString())
                                     var r = wifiScanDAO.insert(wifiScan)
                                     Log.d(TAG, "Scan: ${scan.BSSID} into $r")
@@ -206,7 +231,7 @@ class MacExplorerService : Service() {
                             } else if (BluetoothDevice.ACTION_FOUND == action) {
                                 //bluetooth device found
                                 val device = intent.getParcelableExtra<Parcelable>(BluetoothDevice.EXTRA_DEVICE) as BluetoothDevice?
-                                Log.d(TAG,device.toString())
+                                Log.d(TAG, device.toString())
                                 val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE).toInt()
                                 Log.d(TAG, rssi.toString())
                                 GlobalScope.launch(Dispatchers.IO) {
@@ -304,6 +329,14 @@ class MacExplorerService : Service() {
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun createLocationRequest(): LocationRequest {
+        val locationRequest = LocationRequest.create().apply {
+            interval = 1000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        return locationRequest
     }
 
 }

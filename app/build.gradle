@@ -66,5 +66,7 @@ dependencies {
 
     implementation 'com.wajahatkarim3:roomexplorer:0.0.2'
 
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+
     //debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 }
