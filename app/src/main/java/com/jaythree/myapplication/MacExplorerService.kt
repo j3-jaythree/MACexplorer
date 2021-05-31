@@ -180,17 +180,18 @@ class MacExplorerService : Service() {
                         time = locationListener.lastLocation.time
                         Log.d(TAG, "Getting last location $lon $lat")
                         if(lon == 0.0 && lat == 0.0) {
+                            Log.d(TAG, "Getting last location known $lon $lat")
                             lon = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.longitude
                             lat = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER)!!.latitude
                             time = System.currentTimeMillis()
-                            Log.d(TAG, "Getting last location known $lon $lat")
+
                         }
                     }
 
                     wifiManager?.let {
                         var scanList = it.scanResults as ArrayList<ScanResult>
                         for (scan in scanList) {
-                            if(scan.level <= -67){
+                            if(scan.level >= -67){
                                 var actives = wifiScanDAO.active(scan.BSSID)
                                 if(actives.isNotEmpty()){
                                     wifiScanDAO.updateTime(time, scan.BSSID)
@@ -235,7 +236,7 @@ class MacExplorerService : Service() {
                                 val rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE).toInt()
                                 Log.d(TAG, rssi.toString())
                                 GlobalScope.launch(Dispatchers.IO) {
-                                    if(rssi <= -82) {
+                                    if(rssi >= -82) {
                                         var actives = bluetoothScanDAO.active(device!!.address)
                                         if (actives.isNotEmpty()){
                                             bluetoothScanDAO.updateTime(time, device.address)
@@ -290,10 +291,11 @@ class MacExplorerService : Service() {
         super.onDestroy()
         locationManager!!.removeUpdates(locationListener)
         unregisterReceiver(btReceiver);
-        stopForeground(true)
         Log.d(TAG, "Service stopped")
         powerLock?.let { if (it.isHeld) { it.release() } }
         Toast.makeText(this, "Scanning stopped", Toast.LENGTH_SHORT).show()
+        stopForeground(true)
+        stopSelf()
     }
 
 
@@ -329,14 +331,6 @@ class MacExplorerService : Service() {
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
-    }
-
-    private fun createLocationRequest(): LocationRequest {
-        val locationRequest = LocationRequest.create().apply {
-            interval = 1000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-        return locationRequest
     }
 
 }
