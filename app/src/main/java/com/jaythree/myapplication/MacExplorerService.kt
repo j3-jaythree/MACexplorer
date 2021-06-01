@@ -22,7 +22,6 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.OnCompleteListener
 import com.jaythree.myapplication.db.BluetoothScan
 import com.jaythree.myapplication.db.DataBase
 import com.jaythree.myapplication.db.WiFiScan
@@ -49,7 +48,6 @@ class MacExplorerService : Service() {
 
 
     //Stuff for location changing over time
-    private lateinit var serviceHandler : Handler
 
     private class LocationListener(provider: String) : android.location.LocationListener {
         var lastLocation: Location
@@ -57,6 +55,18 @@ class MacExplorerService : Service() {
             Log.d(TAG, "onLocationChanged: ${location.latitude} ${location.longitude} " +
                     "${location.time}")
             lastLocation.set(location)
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Log.e(TAG, "onProviderDisabled: $provider")
+        }
+
+        override fun onProviderEnabled(provider: String) {
+            Log.e(TAG, "onProviderEnabled: $provider")
+        }
+
+        override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
+            Log.e(TAG, "onStatusChanged: $provider")
         }
 
         init {
@@ -116,30 +126,6 @@ class MacExplorerService : Service() {
             Log.d(TAG, "network provider does not exist, " + ex.message)
         }*/
 
-        //*****************************************************************************
-        /*val locationRequest = createLocationRequest()
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-                location = locationResult.lastLocation
-            }
-        }
-        //val builder = LocationSettingsRequest.Builder()
-          //      .addLocationRequest(locationRequest)
-        val fusedLocationClient = FusedLocationProviderClient(applicationContext)
-        try {
-            fusedLocationClient.requestLocationUpdates(locationRequest,
-                    locationCallback,
-                    Looper.getMainLooper())
-        } catch (e: SecurityException){
-            Log.d(TAG, "Error with location permission")
-        }*/
-
-
-
-        //*****************************************************************************
-
-
         //START OF OUR SCANS LOOP
         //Dispatchers.IO states that the thread is for in/out operations
         GlobalScope.launch(Dispatchers.IO){
@@ -194,7 +180,8 @@ class MacExplorerService : Service() {
                             if(scan.level >= -67){
                                 var actives = wifiScanDAO.active(scan.BSSID)
                                 if(actives.isNotEmpty()){
-                                    wifiScanDAO.updateTime(time, scan.BSSID)
+                                    var i = (actives[0].intensity+scan.level)/2
+                                    wifiScanDAO.updateTime(time, i, scan.BSSID)
                                     Log.d(TAG, "Updated: ${scan.BSSID} into ${actives[0].id}")
                                 } else {
                                     var wifiScan = WiFiScan(bssid = scan.BSSID, lat = lat, lon = lon,
@@ -239,7 +226,8 @@ class MacExplorerService : Service() {
                                     if(rssi >= -82) {
                                         var actives = bluetoothScanDAO.active(device!!.address)
                                         if (actives.isNotEmpty()){
-                                            bluetoothScanDAO.updateTime(time, device.address)
+                                            var i = (actives[0].intensity+rssi)/2
+                                            bluetoothScanDAO.updateTime(time, i, device.address)
                                             Log.d(TAG, "Updatedbt: ${device.address} into ${actives[0].id}")
                                         } else {
                                             var btScan = BluetoothScan(mac = device.address, lat = lat, lon = lon,

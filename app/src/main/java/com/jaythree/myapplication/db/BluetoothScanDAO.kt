@@ -13,10 +13,11 @@ interface BluetoothScanDAO {
     suspend fun selectAll(): List<BluetoothScan>
 
     @Query("UPDATE bluetoothscan " +
-            "SET end = :time " +
+            "SET end = :time, " +
+            "intensity = :intensity " +
             "WHERE mac = :mac " +
             "AND flag = 1")
-    suspend fun updateTime(time: Long, mac: String)
+    suspend fun updateTime(time: Long, intensity: Int, mac: String)
 
     @Query("SELECT * FROM bluetoothscan " +
             "WHERE mac = :mac " +

@@ -14,10 +14,11 @@ interface WiFiScanDAO {
     suspend fun selectAll(): List<WiFiScan>
 
     @Query("UPDATE wifiscan " +
-            "SET end = :time " +
+            "SET end = :time, " +
+            "intensity = :intensity " +
             "WHERE bssid = :bssid " +
             "AND flag = 1")
-    suspend fun updateTime(time: Long, bssid: String)
+    suspend fun updateTime(time: Long, intensity: Int, bssid: String)
 
     @Query("SELECT * FROM wifiscan " +
             "WHERE bssid = :bssid " +
